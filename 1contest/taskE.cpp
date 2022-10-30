@@ -5,26 +5,22 @@ struct Element {
   int value;
   int min;
   Element* prev;
-  Element() {
-    value = 0;
-    min = 0;
-    prev = nullptr;
-  }
+  Element() : value(0), min(0), prev(nullptr) {}
 };
 
-struct Stack {
-  Element head;
-  int len;
-  Stack() {
-    len = 0;
-    head = Element();
-  }
+class Stack {
+ private:
+  Element head_;
+  int len_;
+
+ public:
+  Stack() : len_(0) {}
   void Push(int x) {
-    ++len;
+    ++len_;
     Element* elem = new Element;
     elem->value = x;
-    elem->prev = head.prev;
-    head.prev = elem;
+    elem->prev = head_.prev;
+    head_.prev = elem;
     if (elem->prev == nullptr) {
       elem->min = x;
     } else {
@@ -32,62 +28,67 @@ struct Stack {
     }
   }
   void Pop() {
-    --len;
-    Element* tmp = head.prev;
-    head.prev = head.prev->prev;
+    --len_;
+    Element* tmp = head_.prev;
+    head_.prev = head_.prev->prev;
     delete tmp;
   }
-  int Size() { return len; }
-  bool Empty() { return len == 0; }
-  int Top() { return head.prev->value; }
-  int Min() { return head.prev->min; }
+  int Size() { return len_; }
+  bool Empty() { return len_ == 0; }
+  int Top() { return head_.prev->value; }
+  int Min() { return head_.prev->min; }
   void Clear() {
-    while (len > 0) {
+    while (len_ > 0) {
       Pop();
     }
   }
+  ~Stack() { Clear(); }
 };
 
-struct Queue {
-  Stack st1;
-  Stack st2;
+class Queue {
+ private:
+  Stack st1_;
+  Stack st2_;
   void Move() {
-    while (st1.Size() > 0) {
-      st2.Push(st1.Top());
-      st1.Pop();
+    while (st1_.Size() > 0) {
+      st2_.Push(st1_.Top());
+      st1_.Pop();
     }
   }
-  void Push(int x) { st1.Push(x); }
+
+ public:
+  void Push(int x) { st1_.Push(x); }
   void Pop() {
-    if (st2.Empty()) {
+    if (st2_.Empty()) {
       Move();
     }
-    st2.Pop();
+    st2_.Pop();
   }
   int Min() {
-    if (st1.Empty()) {
-      return st2.Min();
+    if (st1_.Empty()) {
+      return st2_.Min();
     }
-    if (st2.Empty()) {
-      return st1.Min();
+    if (st2_.Empty()) {
+      return st1_.Min();
     }
-    return std::min(st1.Min(), st2.Min());
+    return std::min(st1_.Min(), st2_.Min());
   }
-  int Size() { return st1.Size() + st2.Size(); }
+  int Size() { return st1_.Size() + st2_.Size(); }
   bool Empty() { return Size() == 0; }
   int Front() {
-    if (st2.Empty()) {
+    if (st2_.Empty()) {
       Move();
     }
-    return st2.Top();
+    return st2_.Top();
   }
   void Clear() {
-    st1.Clear();
-    st2.Clear();
+    st1_.Clear();
+    st2_.Clear();
   }
+  ~Queue() { Clear(); }
 };
 
-void Front1(Queue& q, bool need_to_pop) {
+void FrontWithErrorCheck(Queue& q, bool need_to_pop) {
   if (q.Empty()) {
     std::cout << "error\n";
   } else {
@@ -98,7 +99,7 @@ void Front1(Queue& q, bool need_to_pop) {
   }
 }
 
-void Min1(Queue& q) {
+void MinWithErrorCheck(Queue& q) {
   if (q.Empty()) {
     std::cout << "error\n";
   } else {
@@ -119,18 +120,17 @@ int main() {
       q.Push(x);
       std::cout << "ok\n";
     } else if (s == "dequeue") {
-      Front1(q, true);
+      FrontWithErrorCheck(q, true);
     } else if (s == "front") {
-      Front1(q, false);
+      FrontWithErrorCheck(q, false);
     } else if (s == "size") {
       std::cout << q.Size() << "\n";
     } else if (s == "clear") {
       q.Clear();
       std::cout << "ok\n";
     } else if (s == "min") {
-      Min1(q);
+      MinWithErrorCheck(q);
     }
   }
-  q.Clear();
   return 0;
 }
