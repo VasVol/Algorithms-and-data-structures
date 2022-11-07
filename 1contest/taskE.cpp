@@ -1,47 +1,26 @@
 #include <iostream>
 #include <string>
 
-struct Element {
-  int value;
-  int min;
-  Element* prev;
-  Element() : value(0), min(0), prev(nullptr) {}
-};
-
 class Stack {
  private:
+  struct Element {
+    int value;
+    int min;
+    Element* prev;
+    Element() : value(0), min(0), prev(nullptr) {}
+  };
   Element head_;
   int len_;
 
  public:
   Stack() : len_(0) {}
-  void Push(int x) {
-    ++len_;
-    Element* elem = new Element;
-    elem->value = x;
-    elem->prev = head_.prev;
-    head_.prev = elem;
-    if (elem->prev == nullptr) {
-      elem->min = x;
-    } else {
-      elem->min = std::min(x, elem->prev->min);
-    }
-  }
-  void Pop() {
-    --len_;
-    Element* tmp = head_.prev;
-    head_.prev = head_.prev->prev;
-    delete tmp;
-  }
+  void Push(int x);
+  void Pop();
   int Size() { return len_; }
   bool Empty() { return len_ == 0; }
   int Top() { return head_.prev->value; }
   int Min() { return head_.prev->min; }
-  void Clear() {
-    while (len_ > 0) {
-      Pop();
-    }
-  }
+  void Clear();
   ~Stack() { Clear(); }
 };
 
@@ -49,38 +28,15 @@ class Queue {
  private:
   Stack st1_;
   Stack st2_;
-  void Move() {
-    while (st1_.Size() > 0) {
-      st2_.Push(st1_.Top());
-      st1_.Pop();
-    }
-  }
+  void Move();
 
  public:
   void Push(int x) { st1_.Push(x); }
-  void Pop() {
-    if (st2_.Empty()) {
-      Move();
-    }
-    st2_.Pop();
-  }
-  int Min() {
-    if (st1_.Empty()) {
-      return st2_.Min();
-    }
-    if (st2_.Empty()) {
-      return st1_.Min();
-    }
-    return std::min(st1_.Min(), st2_.Min());
-  }
+  void Pop();
+  int Min();
   int Size() { return st1_.Size() + st2_.Size(); }
   bool Empty() { return Size() == 0; }
-  int Front() {
-    if (st2_.Empty()) {
-      Move();
-    }
-    return st2_.Top();
-  }
+  int Front();
   void Clear() {
     st1_.Clear();
     st2_.Clear();
@@ -133,4 +89,61 @@ int main() {
     }
   }
   return 0;
+}
+
+void Stack::Push(int x) {
+  ++len_;
+  Element* elem = new Element;
+  elem->value = x;
+  elem->prev = head_.prev;
+  head_.prev = elem;
+  if (elem->prev == nullptr) {
+    elem->min = x;
+  } else {
+    elem->min = std::min(x, elem->prev->min);
+  }
+}
+
+void Stack::Clear() {
+  while (len_ > 0) {
+    Pop();
+  }
+}
+
+void Stack::Pop() {
+  --len_;
+  Element* tmp = head_.prev;
+  head_.prev = head_.prev->prev;
+  delete tmp;
+}
+
+void Queue::Move() {
+  while (st1_.Size() > 0) {
+    st2_.Push(st1_.Top());
+    st1_.Pop();
+  }
+}
+
+int Queue::Front() {
+  if (st2_.Empty()) {
+    Move();
+  }
+  return st2_.Top();
+}
+
+void Queue::Pop() {
+  if (st2_.Empty()) {
+    Move();
+  }
+  st2_.Pop();
+}
+
+int Queue::Min() {
+  if (st1_.Empty()) {
+    return st2_.Min();
+  }
+  if (st2_.Empty()) {
+    return st1_.Min();
+  }
+  return std::min(st1_.Min(), st2_.Min());
 }
