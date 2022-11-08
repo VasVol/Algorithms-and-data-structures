@@ -9,54 +9,20 @@ class MinMax {
     int idx;
     Element(int val = 0, int idx = 0) : val(val), idx(idx) {}
   };
-  std::vector<Element> heap_min_;
-  std::vector<Element> heap_max_;
-  void EraseHeapMin(int i);
-  void EraseHeapMax(int i);
-  void ExchangeHeapMin(int i, int j) {
-    std::swap(heap_min_[i], heap_min_[j]);
-    std::swap(heap_max_[heap_min_[i].idx].idx, heap_max_[heap_min_[j].idx].idx);
-  }
-  void ExchangeHeapMax(int i, int j) {
-    std::swap(heap_max_[i], heap_max_[j]);
-    std::swap(heap_min_[heap_max_[i].idx].idx, heap_min_[heap_max_[j].idx].idx);
-  }
-  void SiftUpHeapMin(int i) {
-    while (i > 1 && heap_min_[i / 2].val > heap_min_[i].val) {
-      ExchangeHeapMin(i, i / 2);
-      i /= 2;
-    }
-  }
-  void SiftUpHeapMax(int i) {
-    while (i > 1 && heap_max_[i / 2].val < heap_max_[i].val) {
-      ExchangeHeapMax(i, i / 2);
-      i /= 2;
-    }
-  }
-  void SiftDownHeapMin(int i);
-  void SiftDownHeapMax(int i);
+  std::vector<std::vector<Element>> heaps_;
+  bool Cmp(int x, int y, int f);
+  void Erase(int i, int f);
+  void Exchange(int i, int j, int f);
+  void SiftUp(int i, int f);
+  void SiftDown(int i, int f);
 
  public:
-  MinMax() {
-    heap_min_.resize(1);
-    heap_max_.resize(1);
-  }
+  MinMax();
   void Insert(int x);
-  int GetMin() { return heap_min_[1].val; }
-  int GetMax() { return heap_max_[1].val; }
-  void ExtractMin() {
-    EraseHeapMax(heap_min_[1].idx);
-    EraseHeapMin(1);
-  }
-  void ExtractMax() {
-    EraseHeapMin(heap_max_[1].idx);
-    EraseHeapMax(1);
-  }
-  size_t Size() { return heap_min_.size() - 1; }
-  void Clear() {
-    heap_min_.resize(1);
-    heap_max_.resize(1);
-  }
+  int Get(int f);
+  void Extract(int f);
+  size_t Size();
+  void Clear();
 };
 
 int main() {
@@ -73,27 +39,27 @@ int main() {
       std::cout << a.Size() << "\n";
     } else if (s == "get_min") {
       if (a.Size() > 0) {
-        std::cout << a.GetMin() << "\n";
+        std::cout << a.Get(0) << "\n";
       } else {
         std::cout << "error\n";
       }
     } else if (s == "get_max") {
       if (a.Size() > 0) {
-        std::cout << a.GetMax() << "\n";
+        std::cout << a.Get(1) << "\n";
       } else {
         std::cout << "error\n";
       }
     } else if (s == "extract_min") {
       if (a.Size() > 0) {
-        std::cout << a.GetMin() << "\n";
-        a.ExtractMin();
+        std::cout << a.Get(0) << "\n";
+        a.Extract(0);
       } else {
         std::cout << "error\n";
       }
     } else if (s == "extract_max") {
       if (a.Size() > 0) {
-        std::cout << a.GetMax() << "\n";
-        a.ExtractMax();
+        std::cout << a.Get(1) << "\n";
+        a.Extract(1);
       } else {
         std::cout << "error\n";
       }
@@ -106,33 +72,16 @@ int main() {
   }
 }
 
-void MinMax::SiftDownHeapMin(int i) {
-  int sz = heap_min_.size();
+void MinMax::SiftDown(int i, int f) {
+  int sz = heaps_[f].size();
   while (2 * i <= sz - 1) {
     int u = 2 * i;
     if ((2 * i + 1 <= sz - 1) &&
-        (heap_min_[2 * i + 1].val < heap_min_[u].val)) {
+        Cmp(heaps_[f][2 * i + 1].val, heaps_[f][u].val, f)) {
       u = 2 * i + 1;
     }
-    if (heap_min_[i].val > heap_min_[u].val) {
-      ExchangeHeapMin(i, u);
-      i = u;
-    } else {
-      break;
-    }
-  }
-}
-
-void MinMax::SiftDownHeapMax(int i) {
-  int sz = heap_max_.size();
-  while (2 * i <= sz - 1) {
-    int u = 2 * i;
-    if ((2 * i + 1 <= sz - 1) &&
-        (heap_max_[2 * i + 1].val > heap_max_[u].val)) {
-      u = 2 * i + 1;
-    }
-    if (heap_max_[i].val < heap_max_[u].val) {
-      ExchangeHeapMax(i, u);
+    if (Cmp(heaps_[f][i].val, heaps_[f][u].val, 1 - f)) {
+      Exchange(i, u, f);
       i = u;
     } else {
       break;
@@ -141,22 +90,52 @@ void MinMax::SiftDownHeapMax(int i) {
 }
 
 void MinMax::Insert(int x) {
-  heap_min_.push_back(Element(x, heap_min_.size()));
-  heap_max_.push_back(Element(x, heap_max_.size()));
-  SiftUpHeapMin(heap_min_.size() - 1);
-  SiftUpHeapMax(heap_max_.size() - 1);
+  heaps_[0].push_back(Element(x, heaps_[0].size()));
+  heaps_[1].push_back(Element(x, heaps_[1].size()));
+  SiftUp(heaps_[0].size() - 1, 0);
+  SiftUp(heaps_[1].size() - 1, 1);
 }
 
-void MinMax::EraseHeapMin(int i) {
-  ExchangeHeapMin(i, heap_min_.size() - 1);
-  heap_min_.pop_back();
-  SiftUpHeapMin(i);
-  SiftDownHeapMin(i);
+void MinMax::Erase(int i, int f) {
+  Exchange(i, heaps_[f].size() - 1, f);
+  heaps_[f].pop_back();
+  SiftUp(i, f);
+  SiftDown(i, f);
 }
 
-void MinMax::EraseHeapMax(int i) {
-  ExchangeHeapMax(i, heap_max_.size() - 1);
-  heap_max_.pop_back();
-  SiftUpHeapMax(i);
-  SiftDownHeapMax(i);
+void MinMax::SiftUp(int i, int f) {
+  while (i > 1 && Cmp(heaps_[f][i / 2].val, heaps_[f][i].val, 1 - f)) {
+    Exchange(i, i / 2, f);
+    i /= 2;
+  }
+}
+
+void MinMax::Exchange(int i, int j, int f) {
+  std::swap(heaps_[f][i], heaps_[f][j]);
+  std::swap(heaps_[1 - f][heaps_[f][i].idx].idx,
+            heaps_[1 - f][heaps_[f][j].idx].idx);
+}
+
+bool MinMax::Cmp(int x, int y, int f) {
+  return ((f == 0) && (x < y)) || ((f == 1) && (x > y));
+}
+
+MinMax::MinMax() {
+  heaps_.resize(2);
+  heaps_[0].resize(1);
+  heaps_[1].resize(1);
+}
+
+int MinMax::Get(int f) { return heaps_[f][1].val; }
+
+void MinMax::Extract(int f) {
+  Erase(heaps_[f][1].idx, 1 - f);
+  Erase(1, f);
+}
+
+size_t MinMax::Size() { return heaps_[0].size() - 1; }
+
+void MinMax::Clear() {
+  heaps_[0].resize(1);
+  heaps_[1].resize(1);
 }
