@@ -2,16 +2,18 @@
 #include <vector>
 
 int Byte(long long x, int idx) {
-  const int kA = 255;
-  return (x >> (7 - idx) * 8) & kA;
+  const int kBytes = 8;
+  const int kValuesInByte = 256;
+  return (x >> (kBytes - 1 - idx) * kBytes) & (kValuesInByte - 1);
 }
 
 void StableByteSort(std::vector<long long>& v, int idx) {
-  std::vector<int> cnt(256);
+  const int kValuesInByte = 256;
+  std::vector<int> cnt(kValuesInByte);
   for (long long x : v) {
     ++cnt[Byte(x, idx)];
   }
-  for (int i = 1; i < 256; ++i) {
+  for (int i = 1; i < kValuesInByte; ++i) {
     cnt[i] += cnt[i - 1];
   }
   std::vector<long long> ans(v.size());
@@ -22,7 +24,8 @@ void StableByteSort(std::vector<long long>& v, int idx) {
 }
 
 void LSD(std::vector<long long>& v) {
-  for (int idx = 7; idx >= 0; --idx) {
+  const int kBytes = 8;
+  for (int idx = kBytes - 1; idx >= 0; --idx) {
     StableByteSort(v, idx);
   }
 }
