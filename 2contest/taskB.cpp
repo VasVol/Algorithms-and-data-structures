@@ -1,9 +1,9 @@
 #include <iostream>
 #include <vector>
 
-int SortSelect(std::vector<int>& v, int k) {
-  for (int i = 1; i < (int)v.size(); ++i) {
-    for (int j = i; j >= 1; --j) {
+int SortSelect(std::vector<int>& v, int begin, int end, int k) {
+  for (int i = begin; i < end; ++i) {
+    for (int j = i; j >= begin + 1; --j) {
       if (v[j - 1] > v[j]) {
         std::swap(v[j - 1], v[j]);
       } else {
@@ -11,18 +11,17 @@ int SortSelect(std::vector<int>& v, int k) {
       }
     }
   }
-  return v[k];
+  return v[begin + k];
 }
 
-int QuickSelect(std::vector<int>& v, int k) {
-  int p = 10;
-  if ((int)v.size() <= p - 1) {
-    return SortSelect(v, k);
+const int kBlockSize = 5;
+int QuickSelect(std::vector<int>& v, size_t k) {
+  if (v.size() <= kBlockSize - 1) {
+    return SortSelect(v, 0, v.size(), k);
   }
   std::vector<int> medians;
-  for (int i = 0; i + p - 1 < (int)v.size(); i += p) {
-    auto a = std::vector<int>(v.begin() + i, v.begin() + i + p);
-    medians.push_back(SortSelect(a, a.size() / 2));
+  for (size_t i = 0; i + kBlockSize - 1 < v.size(); i += kBlockSize) {
+    medians.push_back(SortSelect(v, i, i + kBlockSize, kBlockSize / 2));
   }
   int x = QuickSelect(medians, medians.size() / 2);
   std::vector<int> a, b;
@@ -33,10 +32,10 @@ int QuickSelect(std::vector<int>& v, int k) {
       b.push_back(elem);
     }
   }
-  if (k < (int)a.size()) {
+  if (k < a.size()) {
     return QuickSelect(a, k);
   }
-  if (k >= (int)v.size() - (int)b.size()) {
+  if (k + b.size() >= v.size()) {
     return QuickSelect(b, k - v.size() + b.size());
   }
   return x;
