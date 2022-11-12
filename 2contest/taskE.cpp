@@ -15,14 +15,18 @@ class MinMax {
   void Exchange(int i, int j, int f);
   void SiftUp(int i, int f);
   void SiftDown(int i, int f);
+  int Get(int f);
+  void Extract(int f);
 
  public:
   MinMax();
   void Insert(int x);
-  int Get(int f);
-  void Extract(int f);
   size_t Size();
   void Clear();
+  int GetMin() { return Get(0); }
+  int GetMax() { return Get(1); }
+  void ExtractMin() { Extract(0); }
+  void ExtractMax() { Extract(1); }
 };
 
 int main() {
@@ -39,27 +43,27 @@ int main() {
       std::cout << a.Size() << "\n";
     } else if (s == "get_min") {
       if (a.Size() > 0) {
-        std::cout << a.Get(0) << "\n";
+        std::cout << a.GetMin() << "\n";
       } else {
         std::cout << "error\n";
       }
     } else if (s == "get_max") {
       if (a.Size() > 0) {
-        std::cout << a.Get(1) << "\n";
+        std::cout << a.GetMax() << "\n";
       } else {
         std::cout << "error\n";
       }
     } else if (s == "extract_min") {
       if (a.Size() > 0) {
-        std::cout << a.Get(0) << "\n";
-        a.Extract(0);
+        std::cout << a.GetMin() << "\n";
+        a.ExtractMin();
       } else {
         std::cout << "error\n";
       }
     } else if (s == "extract_max") {
       if (a.Size() > 0) {
-        std::cout << a.Get(1) << "\n";
-        a.Extract(1);
+        std::cout << a.GetMax() << "\n";
+        a.ExtractMax();
       } else {
         std::cout << "error\n";
       }
