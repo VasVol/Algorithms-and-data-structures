@@ -1,11 +1,11 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
+const int kBlockSize = 5;
 
-int SortSelect(std::vector<int>& v, int k) {
-  for (int i = 1; i < (int)v.size(); ++i) {
-    for (int j = i; j >= 1; --j) {
+int SortSelect(std::vector<int>& v, int begin, int end, int k) {
+  for (int i = begin; i < end; ++i) {
+    for (int j = i; j >= begin + 1; --j) {
       if (v[j - 1] > v[j]) {
         std::swap(v[j - 1], v[j]);
       } else {
@@ -13,81 +13,72 @@ int SortSelect(std::vector<int>& v, int k) {
       }
     }
   }
-  return v[k];
+  return v[begin + k];
 }
 
-int QuickSelect(std::vector<int>& v, int k) {
-  int p = 10;
-  if ((int)v.size() <= p - 1) {
-    return SortSelect(v, k);
-  }
-  std::vector<int> medians;
-  for (int i = 0; i + p - 1 < (int)v.size(); i += p) {
-    auto a = std::vector<int>(v.begin() + i, v.begin() + i + p);
-    medians.push_back(SortSelect(a, a.size() / 2));
-  }
-  int x = QuickSelect(medians, medians.size() / 2);
-  std::vector<int> a, b;
-  for (int elem : v) {
-    if (elem < x) {
-      a.push_back(elem);
-    } else if (elem > x) {
-      b.push_back(elem);
-    }
-  }
-  if (k < (int)a.size()) {
-    return QuickSelect(a, k);
-  }
-  if (k >= (int)v.size() - (int)b.size()) {
-    return QuickSelect(b, k - v.size() + b.size());
-  }
-  return x;
-}
-
-bool Sorted(int begin, int end, vector<int> a) {
-  for (int i = begin; i < end; ++i) {
-    if (a[i - 1] > a[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-std::vector<int> QuickSort(vector<int>& a) {
-  if (a.size() <= 1) {
-    return a;
-  }
-  std::vector<int> b = a;
-  int p = QuickSelect(b, b.size() / 2);
-  std::vector<int> l, m, r;
+void Partition(std::vector<int>& l, std::vector<int>& m, std::vector<int>& r,
+               std::vector<int>& a, int pivot) {
   for (int x : a) {
-    if (x < p) {
+    if (x < pivot) {
       l.push_back(x);
-    } else if (x == p) {
+    } else if (x == pivot) {
       m.push_back(x);
     } else {
       r.push_back(x);
     }
   }
+}
+int QuickSelect(std::vector<int>& v, size_t k) {
+  if (v.size() <= kBlockSize - 1) {
+    return SortSelect(v, 0, v.size(), k);
+  }
+  std::vector<int> medians;
+  for (size_t i = 0; i + kBlockSize - 1 < v.size(); i += kBlockSize) {
+    medians.push_back(SortSelect(v, i, i + kBlockSize, kBlockSize / 2));
+  }
+  int pivot = QuickSelect(medians, medians.size() / 2);
+  std::vector<int> l, m, r;
+  Partition(l, m, r, v, pivot);
+  if (k < l.size()) {
+    return QuickSelect(l, k);
+  }
+  if (k + r.size() >= v.size()) {
+    return QuickSelect(r, k - v.size() + r.size());
+  }
+  return pivot;
+}
+
+void Copy(std::vector<int>& from, std::vector<int>& to) {
+  for (int x : from) {
+    to.push_back(x);
+  }
+}
+
+std::vector<int> QuickSort(std::vector<int>& a) {
+  if (a.size() <= 1) {
+    return a;
+  }
+  std::vector<int> b = a;
+  int pivot = QuickSelect(b, b.size() / 2);
+  std::vector<int> l, m, r;
+  Partition(l, m, r, a, pivot);
   l = QuickSort(l);
   r = QuickSort(r);
-  vector<int> ans;
-  for (int x : l) {
-    ans.push_back(x);
-  }
-  for (int x : m) {
-    ans.push_back(x);
-  }
-  for (int x : r) {
-    ans.push_back(x);
-  }
+  std::vector<int> ans;
+  Copy(l, ans);
+  Copy(m, ans);
+  Copy(r, ans);
   return ans;
 }
 
+void Fast() {
+  std::ios_base::sync_with_stdio(false);
+  std::cin.tie(nullptr);
+  std::cout.tie(nullptr);
+}
+
 int main() {
-  ios_base::sync_with_stdio(false);
-  cin.tie(0);
-  cout.tie(0);
+  Fast();
   int n;
   std::cin >> n;
   std::vector<int> a(n);
