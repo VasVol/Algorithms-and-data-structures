@@ -12,14 +12,12 @@ class SegmentTree {
   std::vector<Node> tree_;
   int size_;
   static const int kNone = -(1 << 30);
+  void Set(int i, int v, int x);
+  void Ans(int i, int v, int x, int& ans, bool& flag);
 
  public:
   SegmentTree(std::vector<int>& a);
-
-  void Set(int i, int v, int x);
-
-  void Ans(int i, int v, int x, int& ans, bool& flag);
-
+  void Set(int i, int v);
   int Ans(int i, int v);
 };
 
@@ -53,6 +51,8 @@ void SegmentTree::Set(int i, int v, int x) {
   tree_[x].val = std::max(tree_[2 * x + 1].val, tree_[2 * x + 2].val);
 }
 
+void SegmentTree::Set(int i, int v) { Set(i, v, 0); }
+
 void SegmentTree::Ans(int i, int v, int x, int& ans, bool& flag) {
   if (flag) {
     return;
@@ -80,9 +80,12 @@ void SegmentTree::Ans(int i, int v, int x, int& ans, bool& flag) {
 }
 
 int SegmentTree::Ans(int i, int v) {
-  int ans = -2;
+  int ans = -1;
   bool flag = false;
   Ans(i, v, 0, ans, flag);
+  if (ans == -1) {
+    return -1;
+  }
   return ans + 1;
 }
 
@@ -108,7 +111,7 @@ int main() {
       int i, v;
       std::cin >> i >> v;
       --i;
-      st.Set(i, v, 0);
+      st.Set(i, v);
     } else {
       int i, v;
       std::cin >> i >> v;
