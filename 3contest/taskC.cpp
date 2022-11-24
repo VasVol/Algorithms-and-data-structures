@@ -1,76 +1,90 @@
+#include <cmath>
 #include <iostream>
 #include <vector>
 
-struct Node {
-  int val;
-  int l;
-  int r;
+class SegmentTree {
+ private:
+  struct Node {
+    int val;
+    int l;
+    int r;
+  };
+  std::vector<Node> tree_;
+  int size_;
+  static const int kNone = -(1 << 30);
+
+ public:
+  SegmentTree(std::vector<int>& a);
+
+  void Set(int i, int v, int x);
+
+  void Ans(int i, int v, int x, int& ans, bool& flag);
+
+  int Ans(int i, int v);
 };
 
-struct SegTree {
-  std::vector<Node> tree;
-  int size;
-  int none = -(1 << 30);
-
-  SegTree(std::vector<int>& a) {
-    int sz = a.size();
-    size = 1;
-    while (size < sz) {
-      size *= 2;
-    }
-    tree.resize(2 * size - 1);
-    for (int i = 0; i < sz; ++i) {
-      tree[size - 1 + i] = {a[i], i, i + 1};
-    }
-    for (int i = sz; i < size; ++i) {
-      tree[size - 1 + i] = {none, i, i + 1};
-    }
-    for (int i = size - 2; i >= 0; --i) {
-      Node son1 = tree[2 * i + 1];
-      Node son2 = tree[2 * i + 2];
-      tree[i] = {std::max(son1.val, son2.val), son1.l, son2.r};
-    }
+SegmentTree::SegmentTree(std::vector<int>& a) {
+  int sz = a.size();
+  size_ = pow(2, ceil(log2(sz)));
+  tree_.resize(2 * size_ - 1);
+  for (int i = 0; i < sz; ++i) {
+    tree_[size_ - 1 + i] = {a[i], i, i + 1};
   }
-
-  void Set(int i, int v, int x) {
-    if (tree[x].r - tree[x].l == 1) {
-      tree[x].val = v;
-      return;
-    }
-    if (i < tree[2 * x + 1].r) {
-      Set(i, v, 2 * x + 1);
-    } else {
-      Set(i, v, 2 * x + 2);
-    }
-    tree[x].val = std::max(tree[2 * x + 1].val, tree[2 * x + 2].val);
+  for (int i = sz; i < size_; ++i) {
+    tree_[size_ - 1 + i] = {kNone, i, i + 1};
   }
-
-  void Ans(int i, int v, int x, int& ans, bool& flag) {
-    if (flag) {
-      return;
-    }
-    if (tree[x].r <= i) {
-      return;
-    }
-    if (tree[x].r - tree[x].l == 1) {
-      if (tree[x].val >= v) {
-        flag = true;
-        ans = tree[x].l;
-      }
-      return;
-    }
-    if (tree[2 * x + 1].r <= i) {
-      Ans(i, v, 2 * x + 2, ans, flag);
-      return;
-    }
-    if (tree[2 * x + 1].val >= v) {
-      Ans(i, v, 2 * x + 1, ans, flag);
-    }
-    if (tree[2 * x + 2].val >= v) {
-      Ans(i, v, 2 * x + 2, ans, flag);
-    }
+  for (int i = size_ - 2; i >= 0; --i) {
+    Node son1 = tree_[2 * i + 1];
+    Node son2 = tree_[2 * i + 2];
+    tree_[i] = {std::max(son1.val, son2.val), son1.l, son2.r};
   }
-};
+}
+
+void SegmentTree::Set(int i, int v, int x) {
+  if (tree_[x].r - tree_[x].l == 1) {
+    tree_[x].val = v;
+    return;
+  }
+  if (i < tree_[2 * x + 1].r) {
+    Set(i, v, 2 * x + 1);
+  } else {
+    Set(i, v, 2 * x + 2);
+  }
+  tree_[x].val = std::max(tree_[2 * x + 1].val, tree_[2 * x + 2].val);
+}
+
+void SegmentTree::Ans(int i, int v, int x, int& ans, bool& flag) {
+  if (flag) {
+    return;
+  }
+  if (tree_[x].r <= i) {
+    return;
+  }
+  if (tree_[x].r - tree_[x].l == 1) {
+    if (tree_[x].val >= v) {
+      flag = true;
+      ans = tree_[x].l;
+    }
+    return;
+  }
+  if (tree_[2 * x + 1].r <= i) {
+    Ans(i, v, 2 * x + 2, ans, flag);
+    return;
+  }
+  if (tree_[2 * x + 1].val >= v) {
+    Ans(i, v, 2 * x + 1, ans, flag);
+  }
+  if (tree_[2 * x + 2].val >= v) {
+    Ans(i, v, 2 * x + 2, ans, flag);
+  }
+}
+
+int SegmentTree::Ans(int i, int v) {
+  int ans = -2;
+  bool flag = false;
+  Ans(i, v, 0, ans, flag);
+  return ans + 1;
+}
 
 void Fast() {
   std::ios_base::sync_with_stdio(false);
@@ -86,7 +100,7 @@ int main() {
   for (int i = 0; i < n; ++i) {
     std::cin >> a[i];
   }
-  SegTree st(a);
+  SegmentTree st(a);
   for (int j = 0; j < m; ++j) {
     int c;
     std::cin >> c;
@@ -99,10 +113,7 @@ int main() {
       int i, v;
       std::cin >> i >> v;
       --i;
-      int ans = -2;
-      bool flag = false;
-      st.Ans(i, v, 0, ans, flag);
-      std::cout << ans + 1 << "\n";
+      std::cout << st.Ans(i, v) << "\n";
     }
   }
 }
