@@ -1,14 +1,15 @@
 #include <iostream>
+#include <list>
 #include <random>
 #include <vector>
 
 class HashTable {
  private:
-  const long long kP = 1e18 + 9;
-  const long long kP1 = 1e9 + 9;
+  static const long long kMod1 = 1e18 + 9;
+  static const long long kMod2 = 1e9 + 9;
   long long a_, b_;
   long long m_, cnt_;
-  std::vector<std::vector<long long>> table_;
+  std::vector<std::list<long long>> table_;
   long long Hash(long long x);
   void Resize();
 
@@ -23,7 +24,7 @@ class HashTable {
 };
 
 long long HashTable::Hash(long long x) {
-  return (((a_ * x + b_) % kP) % m_ + m_) % m_;
+  return (((a_ * x + b_) % kMod1) % m_ + m_) % m_;
 }
 
 bool HashTable::Find(long long x) {
@@ -48,9 +49,9 @@ void HashTable::Insert(long long x) {
 
 void HashTable::Erase(long long x) {
   long long i = Hash(x);
-  for (size_t j = 0; j < table_[i].size(); ++j) {
-    if (table_[i][j] == x) {
-      table_[i].erase(table_[i].begin() + j);
+  for (auto j = table_[i].begin(); j != table_[i].end(); ++j) {
+    if (*j == x) {
+      table_[i].erase(j);
       --cnt_;
       return;
     }
@@ -59,10 +60,10 @@ void HashTable::Erase(long long x) {
 
 void HashTable::Resize() {
   m_ *= 2;
-  a_ = random() % kP1;
-  b_ = random() % kP1;
-  std::vector<std::vector<long long>> tmp(m_);
-  for (std::vector<long long> v : table_) {
+  a_ = random() % kMod2;
+  b_ = random() % kMod2;
+  std::vector<std::list<long long>> tmp(m_);
+  for (std::list<long long> v : table_) {
     for (int x : v) {
       tmp[Hash(x)].push_back(x);
     }
@@ -81,16 +82,15 @@ int main() {
     std::cin >> c;
     int x;
     std::cin >> x;
-    if (c == '+') {
-      h.Insert(x);
-    } else if (c == '-') {
-      h.Erase(x);
-    } else if (c == '?') {
-      if (h.Find(x)) {
-        std::cout << "YES\n";
-      } else {
-        std::cout << "NO\n";
-      }
+    switch (c) {
+      case '+':
+        h.Insert(x);
+        break;
+      case '-':
+        h.Erase(x);
+        break;
+      case '?':
+        std::cout << (h.Find(x) ? "YES\n" : "NO\n");
     }
   }
 }
