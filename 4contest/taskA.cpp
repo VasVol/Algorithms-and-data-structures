@@ -5,8 +5,8 @@
 
 class HashTable {
  private:
-  static const long long kMod1 = 1e18 + 9;
-  static const long long kMod2 = 1e9 + 9;
+  static const long long kModFitToLongLong = 1e18 + 9;
+  static const long long kModFitToInt = 1e9 + 9;
   long long a_, b_;
   long long m_, cnt_;
   std::vector<std::list<long long>> table_;
@@ -24,7 +24,7 @@ class HashTable {
 };
 
 long long HashTable::Hash(long long x) {
-  return (((a_ * x + b_) % kMod1) % m_ + m_) % m_;
+  return (((a_ * x + b_) % kModFitToLongLong) % m_ + m_) % m_;
 }
 
 bool HashTable::Find(long long x) {
@@ -60,10 +60,10 @@ void HashTable::Erase(long long x) {
 
 void HashTable::Resize() {
   m_ *= 2;
-  a_ = random() % kMod2;
-  b_ = random() % kMod2;
+  a_ = random() % kModFitToInt;
+  b_ = random() % kModFitToInt;
   std::vector<std::list<long long>> tmp(m_);
-  for (std::list<long long> v : table_) {
+  for (const std::list<long long>& v : table_) {
     for (int x : v) {
       tmp[Hash(x)].push_back(x);
     }
