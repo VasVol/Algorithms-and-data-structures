@@ -77,11 +77,7 @@ long long AVL::Next(long long x, Node* node) {
     return x;
   }
   if (node->val < x) {
-    long long ans = Next(x, node->children[1]);
-    if (ans != -1) {
-      return ans;
-    }
-    return Next(x, node->children[0]);
+    return Next(x, node->children[1]);
   }
   int ans = Next(x, node->children[0]);
   if (ans != -1) {
