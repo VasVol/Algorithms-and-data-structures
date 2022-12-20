@@ -5,10 +5,10 @@
 class SplayTree {
  private:
   struct Node {
-    std::vector<std::string> val;
+    std::pair<std::string, std::string> val;
     std::vector<Node*> children{2, nullptr};
     Node* parent = nullptr;
-    Node(const std::vector<std::string>& x) : val(x) {}
+    Node(const std::pair<std::string, std::string>& x) : val(x) {}
   };
   Node* root_ = nullptr;
   void Connect(Node* node1, Node* node2, int i);
@@ -18,10 +18,36 @@ class SplayTree {
   void Splay(Node* node);
 
  public:
-  void Insert(const std::vector<std::string>& x);
+  void Insert(const std::pair<std::string, std::string>& x);
   std::string Find(const std::string& s);
   ~SplayTree();
 };
+
+void Fast() {
+  std::ios_base::sync_with_stdio(false);
+  std::cin.tie(nullptr);
+  std::cout.tie(nullptr);
+}
+
+int main() {
+  Fast();
+  SplayTree t;
+  int n;
+  std::cin >> n;
+  for (int i = 0; i < n; ++i) {
+    std::string s1, s2;
+    std::cin >> s1 >> s2;
+    t.Insert({s1, s2});
+    t.Insert({s2, s1});
+  }
+  int q;
+  std::cin >> q;
+  for (int i = 0; i < q; ++i) {
+    std::string s;
+    std::cin >> s;
+    std::cout << t.Find(s) << "\n";
+  }
+}
 
 int SplayTree::SonNumber(Node* node) {
   if (node->parent->children[0] == node) {
@@ -84,14 +110,14 @@ void SplayTree::Splay(SplayTree::Node* node) {
   Splay(node);
 }
 
-void SplayTree::Insert(const std::vector<std::string>& x) {
+void SplayTree::Insert(const std::pair<std::string, std::string>& x) {
   if (root_ == nullptr) {
     root_ = new Node(x);
     return;
   }
   Node* curr = root_;
-  while (curr->val[0] != x[0]) {
-    if (curr->val[0] > x[0]) {
+  while (curr->val.first != x.first) {
+    if (curr->val.first > x.first) {
       if (curr->children[0] == nullptr) {
         Node* new_node = new Node(x);
         Connect(curr, new_node, 0);
@@ -117,10 +143,11 @@ std::string SplayTree::Find(const std::string& s) {
     if (curr == nullptr) {
       return "";
     }
-    if (curr->val[0] == s) {
-      return curr->val[1];
+    if (curr->val.first == s) {
+      Splay(curr);
+      return root_->val.second;
     }
-    if (curr->val[0] > s) {
+    if (curr->val.first > s) {
       curr = curr->children[0];
     } else {
       curr = curr->children[1];
@@ -129,29 +156,3 @@ std::string SplayTree::Find(const std::string& s) {
 }
 
 SplayTree::~SplayTree() { Clear(root_); }
-
-void Fast() {
-  std::ios_base::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-  std::cout.tie(nullptr);
-}
-
-int main() {
-  Fast();
-  SplayTree t;
-  int n;
-  std::cin >> n;
-  for (int i = 0; i < n; ++i) {
-    std::string s1, s2;
-    std::cin >> s1 >> s2;
-    t.Insert({s1, s2});
-    t.Insert({s2, s1});
-  }
-  int q;
-  std::cin >> q;
-  for (int i = 0; i < q; ++i) {
-    std::string s;
-    std::cin >> s;
-    std::cout << t.Find(s) << "\n";
-  }
-}
