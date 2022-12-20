@@ -5,23 +5,67 @@ std::random_device rd;
 std::mt19937 mt(rd());
 std::uniform_real_distribution<double> dist(1.0, 10.0);
 
-struct Node {
-  long long x;
-  double y;
-  int count = 1;
-  Node* right = nullptr;
-  Node* left = nullptr;
-  Node(long long x, double y) : x(x), y(y) {}
+class Treap {
+ private:
+  struct Node {
+    long long x;
+    double y;
+    int count = 1;
+    Node* right = nullptr;
+    Node* left = nullptr;
+    Node(long long x, double y) : x(x), y(y) {}
+  };
+  Node* root_ = nullptr;
+  static Node* Merge(Node* a, Node* b);
+  static void Update(Node* node);
+  static std::pair<Node*, Node*> Split(Node* node, long long k);
+  static long long Next(long long x, Node* node);
+  static long long Prev(long long x, Node* node);
+  static long long Kth(int k, Node* node);
+
+ public:
+  void Insert(long long x);
+  void Erase(long long x);
+  bool Find(long long x);
+  long long Next(long long x);
+  long long Prev(long long x);
+  long long Kth(int k);
+  static void Clear(Node* curr);
+  ~Treap();
 };
 
-void Update(Node* node) {
+int main() {
+  Treap t;
+  std::string s;
+  long long x;
+  while (std::cin >> s >> x) {
+    if (s == "insert") {
+      t.Insert(x);
+    } else if (s == "delete") {
+      t.Erase(x);
+    } else if (s == "exists") {
+      std::cout << (t.Find(x) ? "true" : "false") << "\n";
+    } else if (s == "next") {
+      long long ans = t.Next(x);
+      std::cout << (ans != -1 ? std::to_string(ans) : "none") << "\n";
+    } else if (s == "prev") {
+      long long ans = t.Prev(x);
+      std::cout << (ans != -1 ? std::to_string(ans) : "none") << "\n";
+    } else if (s == "kth") {
+      long long ans = t.Kth(x);
+      std::cout << (ans != -1 ? std::to_string(ans) : "none") << "\n";
+    }
+  }
+}
+
+void Treap::Update(Node* node) {
   if (node != nullptr) {
     node->count = (node->left != nullptr ? node->left->count : 0) +
                   (node->right != nullptr ? node->right->count : 0) + 1;
   }
 }
 
-std::pair<Node*, Node*> Split(Node* node, long long k) {
+std::pair<Treap::Node*, Treap::Node*> Treap::Split(Node* node, long long k) {
   if (node == nullptr) {
     return {nullptr, nullptr};
   }
@@ -37,7 +81,7 @@ std::pair<Node*, Node*> Split(Node* node, long long k) {
   return {p.first, node};
 }
 
-Node* Merge(Node* a, Node* b) {
+Treap::Node* Treap::Merge(Node* a, Node* b) {
   if (a == nullptr) {
     return b;
   }
@@ -53,26 +97,6 @@ Node* Merge(Node* a, Node* b) {
   Update(b);
   return b;
 }
-
-class Treap {
- private:
-  Node* root_ = nullptr;
-  long long Next(long long x, Node* node);
-  long long Prev(long long x, Node* node);
-  long long Kth(int k, Node* node);
-  long long Sum(long long l, long long r, Node* node);
-
- public:
-  void Insert(long long x);
-  void Erase(long long x);
-  bool Find(long long x);
-  long long Next(long long x);
-  long long Prev(long long x);
-  long long Kth(int k);
-  long long Sum(long long l, long long r);
-  void Clear(Node* curr);
-  ~Treap();
-};
 
 Treap::~Treap() { Clear(root_); }
 
@@ -170,55 +194,5 @@ void Treap::Clear(Node* curr) {
     Clear(curr->left);
     Clear(curr->right);
     delete curr;
-  }
-}
-
-long long Treap::Sum(long long l, long long r, Node* node) {
-  if (node == nullptr) {
-    return 0;
-  }
-  if (node->x > r) {
-    return Sum(l, r, node->left);
-  }
-  if (node->x < l) {
-    return Sum(l, r, node->right);
-  }
-  return Sum(l, r, node->left) + Sum(l, r, node->right);
-}
-long long Treap::Sum(long long l, long long r) { return Sum(l, r, root_); }
-
-int main() {
-  Treap t;
-  std::string s;
-  long long x;
-  while (std::cin >> s >> x) {
-    if (s == "insert") {
-      t.Insert(x);
-    } else if (s == "delete") {
-      t.Erase(x);
-    } else if (s == "exists") {
-      std::cout << (t.Find(x) ? "true" : "false") << "\n";
-    } else if (s == "next") {
-      long long ans = t.Next(x);
-      if (ans != -1) {
-        std::cout << ans << "\n";
-      } else {
-        std::cout << "none\n";
-      }
-    } else if (s == "prev") {
-      long long ans = t.Prev(x);
-      if (ans != -1) {
-        std::cout << ans << "\n";
-      } else {
-        std::cout << "none\n";
-      }
-    } else if (s == "kth") {
-      long long ans = t.Kth(x);
-      if (ans != -1) {
-        std::cout << ans << "\n";
-      } else {
-        std::cout << "none\n";
-      }
-    }
   }
 }
