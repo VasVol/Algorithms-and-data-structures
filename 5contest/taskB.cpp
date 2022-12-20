@@ -12,13 +12,13 @@ class AVL {
   };
   Node* root_ = nullptr;
   void Connect(Node* node1, Node* node2, int i);
-  int SonNumber(Node* node);
-  void UpdateH(Node* node);
-  int H(Node* node);
-  int Delta(Node* node);
+  static int SonNumber(Node* node);
+  static void UpdateH(Node* node);
+  static int Height(Node* node);
+  static int Delta(Node* node);
   void Spin(Node* node, int i);
-  long long Next(long long x, Node* node);
-  void Clear(Node* node);
+  static long long Next(long long x, Node* node);
+  static void Clear(Node* node);
   void Fix(Node* node);
 
  public:
@@ -46,13 +46,13 @@ int AVL::SonNumber(Node* node) {
 }
 
 void AVL::UpdateH(Node* node) {
-  node->h = 1 + std::max(H(node->children[0]), H(node->children[1]));
+  node->h = 1 + std::max(Height(node->children[0]), Height(node->children[1]));
 }
 
-int AVL::H(Node* node) { return node != nullptr ? node->h : 0; }
+int AVL::Height(Node* node) { return node != nullptr ? node->h : 0; }
 
 int AVL::Delta(Node* node) {
-  return H(node->children[0]) - H(node->children[1]);
+  return Height(node->children[0]) - Height(node->children[1]);
 }
 
 void AVL::Spin(Node* node, int i) {
@@ -150,6 +150,7 @@ long long AVL::Next(long long x) { return Next(x, root_); }
 AVL::~AVL() { Clear(root_); }
 
 int main() {
+  const int kMod = 1000'000'000;
   AVL t;
   int n;
   std::cin >> n;
@@ -160,7 +161,7 @@ int main() {
     long long x;
     std::cin >> x;
     if (c == '+') {
-      t.Insert((x + prev) % 1000'000'000);
+      t.Insert((x + prev) % kMod);
       prev = 0;
     } else if (c == '?') {
       long long ans = t.Next(x);
