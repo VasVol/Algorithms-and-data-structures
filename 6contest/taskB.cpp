@@ -3,17 +3,18 @@
 #include <iostream>
 #include <vector>
 
-std::vector<size_t> Increasing(int n, const std::vector<int>& new_sequence) {
+std::vector<size_t> Longest_increasing_subsequence(int n, const std::vector<int>& input_sequence) {
   std::vector<int> sequence(n + 1);
   for (int i = 1; i <= n; ++i) {
-    sequence[i] = new_sequence[i - 1];
+    sequence[i] = input_sequence[i - 1];
   }
-  std::vector<int> dp(n + 1, INT_MAX);
+  std::vector<int> dp(n + 1, INT_MAX); // dp[i] = минимальное значение последнего элемента в возрастающей
+  // последовательности фиксированной длины, если можно использовать только элементы seq[1], ... seq[i]
   dp[0] = -INT_MAX;
   std::vector<size_t> answers = {0};
   for (int i = 1; i <= n; ++i) {
     size_t idx =
-        std::lower_bound(dp.begin(), dp.end(), sequence[i]) - dp.begin();
+      std::lower_bound(dp.begin(), dp.end(), sequence[i]) - dp.begin();
     answers.push_back(idx);
     dp[idx] = sequence[i];
   }
@@ -45,15 +46,8 @@ bool operator<(ElemAndIdx a1, ElemAndIdx a2) {
   return (a1.elem < a2.elem) || (a1.elem == a2.elem && a1.idx < a2.idx);
 }
 
-int main() {
-  int n;
-  std::cin >> n;
-  std::vector<ElemAndIdx> sequence(n);
-  for (int i = 0; i < n; ++i) {
-    int x;
-    std::cin >> x;
-    sequence[i] = {x, 0};
-  }
+void Solve(int n, const std::vector<ElemAndIdx>& input_sequence) {
+  auto sequence = input_sequence;
   std::reverse(sequence.begin(), sequence.end());
   for (int i = 0; i < n; ++i) {
     sequence[i].idx = i;
@@ -63,7 +57,7 @@ int main() {
   for (int i = 0; i < n; ++i) {
     new_sequence[sequence[i].idx] = i;
   }
-  auto ans = Increasing(n, new_sequence);
+  auto ans = Longest_increasing_subsequence(n, new_sequence);
   for (auto& x : ans) {
     x = n + 1 - x;
   }
@@ -72,4 +66,16 @@ int main() {
   for (auto x : ans) {
     std::cout << x << " ";
   }
+}
+
+int main() {
+  int n;
+  std::cin >> n;
+  std::vector<ElemAndIdx> sequence(n);
+  for (int i = 0; i < n; ++i) {
+    int x;
+    std::cin >> x;
+    sequence[i] = {x, 0};
+  }
+  Solve(n, sequence);
 }
