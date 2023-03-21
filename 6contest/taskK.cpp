@@ -2,16 +2,7 @@
 #include <iostream>
 #include <vector>
 
-int main() {
-  int n, m;
-  std::cin >> n >> m;
-  std::vector<int> w(n + 1), c(n + 1);
-  for (int i = 1; i <= n; ++i) {
-    std::cin >> w[i];
-  }
-  for (int i = 1; i <= n; ++i) {
-    std::cin >> c[i];
-  }
+void Knapsack(int n, int m, const std::vector<int>& w, const std::vector<int>& c) {
   const int kInf = (1 << 30);
   std::vector<std::vector<int>> dp(n + 1, std::vector<int>(m + 1, -kInf));
   std::vector<std::vector<int>> ans(n + 1, std::vector<int>(m + 1, 0));
@@ -40,4 +31,17 @@ int main() {
   for (int idx : answer) {
     std::cout << idx << "\n";
   }
+}
+
+int main() {
+  int n, m;
+  std::cin >> n >> m;
+  std::vector<int> w(n + 1), c(n + 1);
+  for (int i = 1; i <= n; ++i) {
+    std::cin >> w[i];
+  }
+  for (int i = 1; i <= n; ++i) {
+    std::cin >> c[i];
+  }
+  Knapsack(n, m, w, c);
 }
