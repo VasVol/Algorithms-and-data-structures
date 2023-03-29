@@ -9,19 +9,19 @@ void Fast() {
   std::cout.tie(nullptr);
 }
 
-int main() {
-  Fast();
-  std::string alpha, beta;
-  std::cin >> alpha >> beta;
+long long Solve(std::string alpha, std::string beta, long long k) {
   long long len_a = alpha.size(), len_b = beta.size();
-  long long k;
-  std::cin >> k;
   if (std::abs(len_a - len_b) > k) {
-    std::cout << -1;
-    return 0;
+    return -1;
   }
-  std::vector<std::vector<std::vector<long long>>> dp(
-    len_a + k + 1, std::vector<std::vector<long long>>(k + 1, std::vector<long long>(k + 1, 0)));
+  // dp[i][d][a] - максимальное количество совпавших позиций с префиксом строки beta длины i,
+  // если из какого-то префикса строки alpha сделали строку длины i, сделав d удалений и a добавлений
+  // избавляемся от первого индекса i, потому что используем только dp[i-1] и dp[i]-й при подсчете dp[i]
+  // поэтому в итоге храним только предыдущий данный dp2 и предыдущий dp1, и ещё dp_len_b, что соответствует
+  // dp[len_b], для подсчета ответа
+  std::vector<std::vector<long long>> dp1(k + 1, std::vector<long long>(k + 1, 0));
+  auto dp2 = dp1;
+  auto dp_len_b = dp1;
   for (long long i = 1; i <= len_a + k; ++i) {
     for (long long d = 0; d <= k; ++d) {
       for (long long a = 0; a <= k - d; ++a) {
@@ -32,24 +32,37 @@ int main() {
           continue;
         }
         if (d > 0) {
-          dp[i][d][a] = std::max(dp[i][d][a], dp[i][d - 1][a]);
+          dp2[d][a] = std::max(dp2[d][a], dp2[d - 1][a]);
         }
         if (a > 0) {
-          dp[i][d][a] = std::max(dp[i][d][a], dp[i - 1][d][a - 1] + 1);
+          dp2[d][a] = std::max(dp2[d][a], dp1[d][a - 1] + 1);
         }
         if ((i - a + d - 1 >= 0) && (i - 1 < len_b) && (i - a + d - 1 < len_a)) {
-          dp[i][d][a] = std::max(dp[i][d][a], dp[i - 1][d][a] + (alpha[i - a + d - 1] == beta[i - 1]));
+          dp2[d][a] = std::max(dp2[d][a], dp1[d][a] + (alpha[i - a + d - 1] == beta[i - 1]));
         }
       }
+    }
+    dp1 = dp2;
+    if (i == len_b) {
+      dp_len_b = dp2;
     }
   }
   long long ans = 0;
   for (long long d = 0; d <= k; ++d) {
     for (long long a = 0; a <= k - d; ++a) {
       if (len_a - d + a == len_b) {
-        ans = std::max(ans, dp[len_b][d][a] + k - a - d);
+        ans = std::max(ans, dp_len_b[d][a] + k - a - d);
       }
     }
   }
-  std::cout << std::max(0ll, (len_b - ans));
+  return std::max(0ll, (len_b - ans));
+}
+
+int main() {
+  Fast();
+  std::string alpha, beta;
+  std::cin >> alpha >> beta;
+  long long k;
+  std::cin >> k;
+  std::cout << Solve(alpha, beta, k);
 }
