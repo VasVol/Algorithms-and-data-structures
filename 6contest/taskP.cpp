@@ -4,7 +4,7 @@
 
 int Bit(int mask, int pos) { return (mask >> pos) & 1; }
 
-bool Can_be_adjacent(int mask, const std::vector<int>& v, int n) {
+bool CanBeAdjacent(int mask, const std::vector<int>& v, int n) {
   for (int i = 0; i < n; ++i) {
     if ((v[i] != 2) && (v[i] != Bit(mask, i))) {
       return false;
@@ -33,21 +33,21 @@ std::vector<int> PrevMasks(int mask, int n) {
   return ans;
 }
 
-int Solve(int n, int m, const std::vector<std::vector<int>>& v, const int kMod) {
+int CountDistributions(int n, int m, const std::vector<std::vector<int>>& v, const int kMod) {
   std::vector<std::vector<int>> dp(m, std::vector<int>(1 << n, 0));
   for (int mask = 0; mask < (1 << n); ++mask) {
-    if (Can_be_adjacent(mask, v[0], n)) {
+    if (CanBeAdjacent(mask, v[0], n)) {
       dp[0][mask] = 1;
     }
   }
   for (int i = 1; i < m; ++i) {
     for (int mask = 0; mask < (1 << n); ++mask) {
-      if (!Can_be_adjacent(mask, v[i], n)) {
+      if (!CanBeAdjacent(mask, v[i], n)) {
         continue;
       }
       std::vector<int> prev_masks = PrevMasks(mask, n);
       for (int prev_mask : prev_masks) {
-        if (Can_be_adjacent(prev_mask, v[i - 1], n)) {
+        if (CanBeAdjacent(prev_mask, v[i - 1], n)) {
           dp[i][mask] += dp[i - 1][prev_mask];
           dp[i][mask] %= kMod;
         }
@@ -80,5 +80,5 @@ int main() {
       }
     }
   }
-  std::cout << Solve(n, m, v, kMod) << "\n";
+  std::cout << CountDistributions(n, m, v, kMod) << "\n";
 }
