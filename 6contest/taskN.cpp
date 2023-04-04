@@ -9,10 +9,11 @@ void Fast() {
   std::cout.tie(nullptr);
 }
 
-long long Solve(std::string alpha, std::string beta, long long k) {
+long long MinPosCount(const std::string& alpha, const std::string& beta, long long k) {
+  const int no_solutions = -1;
   long long len_a = alpha.size(), len_b = beta.size();
   if (std::abs(len_a - len_b) > k) {
-    return -1;
+    return no_solutions;
   }
   // dp[i][d][a] - максимальное количество совпавших позиций с префиксом строки beta длины i,
   // если из какого-то префикса строки alpha сделали строку длины i, сделав d удалений и a добавлений
@@ -21,8 +22,7 @@ long long Solve(std::string alpha, std::string beta, long long k) {
   // dp[len_b], для подсчета ответа
   std::vector<std::vector<long long>> dp1(k + 1, std::vector<long long>(k + 1, 0));
   auto dp2 = dp1;
-  auto dp_len_b = dp1;
-  for (long long i = 1; i <= len_a + k; ++i) {
+  for (long long i = 1; (i <= len_a + k) && (i <= len_b); ++i) {
     for (long long d = 0; d <= k; ++d) {
       for (long long a = 0; a <= k - d; ++a) {
         if (len_a - d + a < 0) {
@@ -43,15 +43,12 @@ long long Solve(std::string alpha, std::string beta, long long k) {
       }
     }
     dp1 = dp2;
-    if (i == len_b) {
-      dp_len_b = dp2;
-    }
   }
   long long ans = 0;
   for (long long d = 0; d <= k; ++d) {
     for (long long a = 0; a <= k - d; ++a) {
       if (len_a - d + a == len_b) {
-        ans = std::max(ans, dp_len_b[d][a] + k - a - d);
+        ans = std::max(ans, dp2[d][a] + k - a - d);
       }
     }
   }
@@ -64,5 +61,5 @@ int main() {
   std::cin >> alpha >> beta;
   long long k;
   std::cin >> k;
-  std::cout << Solve(alpha, beta, k);
+  std::cout << MinPosCount(alpha, beta, k);
 }
