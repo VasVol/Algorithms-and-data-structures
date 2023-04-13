@@ -12,31 +12,36 @@ class Graph {
   std::vector<int> topo_sort_;
 
  public:
-  Graph(bool oriented);
+  Graph(const std::vector<std::pair<int, int>>& edges, bool oriented,
+        int n, int m);
   void Dfs(int v, int k = 0);
   void Reverse();
-  void Kosaraju();
+  int Kosaraju();
+  void Solve();
 };
 
 int main() {
-  Graph gr(true);
-  gr.Kosaraju();
+  int n, m;
+  std::cin >> n >> m;
+  std::vector<std::pair<int, int>> edges(m);
+  for (int i = 0; i < m; ++i) {
+    std::cin >> edges[i].first >> edges[i].second;
+  }
+  Graph gr(edges, true, n, m);
+  gr.Solve();
 }
 
-Graph::Graph(bool oriented) {
-  std::cin >> n_ >> m_;
-  g_.resize(n_);
-  for (int i = 0; i < m_; ++i) {
-    int x, y;
-    std::cin >> x >> y;
-    g_[x - 1].push_back(y - 1);
+Graph::Graph(const std::vector<std::pair<int, int>>& edges, bool oriented,
+             int n, int m) : n_(n), m_(m), g_(n_), color_(n_, 0),
+             component_(n_, -1), topo_sort_(0) {
+  for (auto edge : edges) {
+    int x = edge.first - 1;
+    int y = edge.second - 1;
+    g_[x].push_back(y);
     if (!oriented) {
-      g_[y - 1].push_back(x - 1);
+      g_[y].push_back(x);
     }
   }
-  color_.resize(n_, 0);
-  component_.resize(n_, -1);
-  topo_sort_.resize(0);
 }
 
 void Graph::Dfs(int v, int k) {
@@ -61,7 +66,7 @@ void Graph::Reverse() {
   g_ = ans;
 }
 
-void Graph::Kosaraju() {
+int Graph::Kosaraju() {
   for (int v = 0; v < n_; ++v) {
     if (color_[v] == 0) {
       Dfs(v);
@@ -78,7 +83,11 @@ void Graph::Kosaraju() {
       ++k;
     }
   }
-  std::cout << k - 1 << "\n";
+  return k - 1;
+}
+
+void Graph::Solve() {
+  Kosaraju();
   for (int v = 0; v < n_; ++v) {
     std::cout << component_[v] << " ";
   }
