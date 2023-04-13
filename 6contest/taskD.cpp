@@ -26,7 +26,7 @@ int MinimumNumberOfExperiments(int n, int k) {
     for (int j = 1; j <= n; ++j) {
       dp1[j] = dp1[j - 1] + dp0[j - 1] + 1;
     }
-    dp0 = dp1;
+    dp0.swap(dp1);
   }
   for (int j = 0; j <= n; ++j) {
     if (dp0[j] >= n - 1) {
