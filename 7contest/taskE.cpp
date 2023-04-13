@@ -4,8 +4,21 @@
 #include <set>
 #include <vector>
 
+struct Edge {
+  int x;
+  int y;
+};
+
+bool operator<(const Edge& a, const Edge& b) {
+  if (a.x != b.x) {
+    return a.x < b.x;
+  }
+  return a.y < b.y;
+}
+
 class Graph {
  private:
+  const int kInf = 1e9;
   int n_ = 0;
   int m_ = 0;
   int timer_ = 0;
@@ -13,32 +26,37 @@ class Graph {
   std::vector<bool> used_;
   std::vector<int> tin_;
   std::vector<int> ret_;
-  std::map<std::pair<int, int>, int> edge_number_;
+  std::map<Edge, int> edge_number_;
   std::vector<int> parent_;
   std::vector<int> bridges_;
-  std::set<std::pair<int, int>> multiple_edges_;
+  std::set<Edge> multiple_edges_;
 
  public:
-  Graph();
+  Graph(const std::vector<Edge>& edges, int n, int m);
   void Dfs(int v);
   void FindBridges();
 };
 
 int main() {
-  Graph gr;
+  int n, m;
+  std::cin >> n >> m;
+  std::vector<Edge> edges(m);
+  for (int i = 0; i < m; ++i) {
+    std::cin >> edges[i].x >> edges[i].y;
+  }
+  Graph gr(edges, n, m);
   gr.FindBridges();
 }
 
-Graph::Graph() {
-  std::cin >> n_ >> m_;
-  g_.resize(n_);
+Graph::Graph(const std::vector<Edge>& edges, int n, int m)
+             : n_(n), m_(m), g_(n_), used_(n_, false), tin_(n_, -1),
+             ret_(n_, kInf), parent_(n_, -1), bridges_(0) {
   for (int i = 0; i < m_; ++i) {
-    int x, y;
-    std::cin >> x >> y;
+    int x = edges[i].x - 1;
+    int y = edges[i].y - 1;
     if (x == y) {
       continue;
     }
-    --x, --y;
     if (edge_number_.find({x, y}) != edge_number_.end()) {
       multiple_edges_.insert({x, y});
       multiple_edges_.insert({y, x});
@@ -49,11 +67,6 @@ Graph::Graph() {
       g_[y].push_back(x);
     }
   }
-  used_.resize(n_, false);
-  tin_.resize(n_, -1);
-  ret_.resize(n_, 1e9);
-  parent_.resize(n_, -1);
-  bridges_.resize(0);
 }
 
 void Graph::Dfs(int v) {
