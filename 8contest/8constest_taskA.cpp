@@ -19,47 +19,53 @@ class Graph {
       return num < other.num;
     }
   };
-  const long long kInf = 2009000999;
+  inline static const long long kInf = 2009000999;
   long long n_ = 0;
   long long m_ = 0;
   std::vector<std::vector<Edge>> g_;
-  std::vector<long long> min_dist_;
-  std::set<Vertex> not_used_;
-  std::vector<bool> used_;
 
  public:
-  Graph();
-  void Dijkstra(long long start);
+  Graph(int n, int m, const std::vector<std::vector<int>>& g);
+  std::vector<long long> Dijkstra(long long start);
 };
 
 int main() {
   long long cnt;
   std::cin >> cnt;
-  for (long long i = 0; i < cnt; ++i) {
-    Graph gr;
+  for (long long k = 0; k < cnt; ++k) {
+    int n, m;
+    std::cin >> n >> m;
+    std::vector<std::vector<int>> g(m, std::vector<int>(3));
+    for (int i = 0; i < m; ++i) {
+      for (int j = 0; j < 3; ++j) {
+        std::cin >> g[i][j];
+      }
+    }
+    Graph gr(n, m, g);
     long long start;
     std::cin >> start;
-    gr.Dijkstra(start);
+    auto ans = gr.Dijkstra(start);
+    for (auto dist : ans) {
+      std::cout << dist << " ";
+    }
   }
 }
 
-Graph::Graph() {
-  std::cin >> n_ >> m_;
+Graph::Graph(int n, int m, const std::vector<std::vector<int>>& g): n_(n), m_(m) {
   g_.resize(n_);
-  min_dist_.resize(n_, kInf);
-  used_.resize(n_, false);
-  not_used_ = std::set<Vertex>();
   for (long long i = 0; i < m_; ++i) {
-    long long v1;
-    long long v2;
-    long long cost;
-    std::cin >> v1 >> v2 >> cost;
+    long long v1 = g[i][0];
+    long long v2 = g[i][1];
+    long long cost = g[i][2];
     g_[v1].push_back({v2, cost});
     g_[v2].push_back({v1, cost});
   }
 }
 
-void Graph::Dijkstra(long long start) {
+std::vector<long long> Graph::Dijkstra(long long start) {
+  std::vector<long long> min_dist_(n_, kInf);
+  std::set<Vertex> not_used_;
+  std::vector<bool> used_(n_, false);
   min_dist_[start] = 0;
   not_used_.insert({start, min_dist_[start]});
   while (!not_used_.empty()) {
@@ -72,13 +78,11 @@ void Graph::Dijkstra(long long start) {
         continue;
       }
       long long new_dist =
-          std::min(min_dist_[edge.num], min_dist_[vert.num] + edge.cost);
+        std::min(min_dist_[edge.num], min_dist_[vert.num] + edge.cost);
       not_used_.erase({edge.num, min_dist_[edge.num]});
       min_dist_[edge.num] = new_dist;
       not_used_.insert({edge.num, min_dist_[edge.num]});
     }
   }
-  for (auto dist : min_dist_) {
-    std::cout << dist << " ";
-  }
+  return min_dist_;
 }
