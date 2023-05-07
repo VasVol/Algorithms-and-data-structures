@@ -13,13 +13,25 @@ struct Elem {
   int cost;
 };
 
-void Solve(int num, const std::vector<std::vector<int>>& costs) {
-  const int kInf = 1e9;
+void PrintAns(const std::vector<int>& ans, Elem elem) {
+  std::vector<int> answer;
+  answer.push_back(elem.vertex);
+  for (auto it = ans.rbegin(); it != ans.rend(); ++it) {
+    answer.push_back(*it);
+    if (*it == elem.vertex) {
+      break;
+    }
+  }
+  std::cout << answer.size() << "\n";
+  for (int x : answer) {
+    std::cout << x + 1 << " ";
+  }
+}
+
+void FordBellman(int num, std::vector<std::vector<int>>& dp,
+                 std::vector<std::vector<Elem>>& parent,
+                 const std::vector<std::vector<int>>& costs) {
   const int kNoEdge = 1e5;
-  std::vector<std::vector<int>> dp(num, std::vector<int>(num + 1, kInf));
-  dp[0][0] = 0;
-  std::vector<std::vector<Elem>> parent(num,
-                                        std::vector<Elem>(num + 1, {-1, -1}));
   for (int cost = 1; cost <= num; ++cost) {
     for (int vertex = 0; vertex < num; ++vertex) {
       dp[vertex][cost] = dp[vertex][cost - 1];
@@ -35,6 +47,15 @@ void Solve(int num, const std::vector<std::vector<int>>& costs) {
       }
     }
   }
+}
+
+void Solve(int num, const std::vector<std::vector<int>>& costs) {
+  const int kInf = 1e9;
+  std::vector<std::vector<int>> dp(num, std::vector<int>(num + 1, kInf));
+  dp[0][0] = 0;
+  std::vector<std::vector<Elem>> parent(num,
+                                        std::vector<Elem>(num + 1, {-1, -1}));
+  FordBellman(num, dp, parent, costs);
   int curr = -1;
   for (int vertex = 0; vertex < num; ++vertex) {
     if (dp[vertex][num] < dp[vertex][num - 1]) {
@@ -55,18 +76,7 @@ void Solve(int num, const std::vector<std::vector<int>>& costs) {
     used[elem.vertex] = true;
     elem = parent[elem.vertex][elem.cost];
   }
-  std::vector<int> answer;
-  answer.push_back(elem.vertex);
-  for (auto it = ans.rbegin(); it != ans.rend(); ++it) {
-    answer.push_back(*it);
-    if (*it == elem.vertex) {
-      break;
-    }
-  }
-  std::cout << answer.size() << "\n";
-  for (int x : answer) {
-    std::cout << x + 1 << " ";
-  }
+  PrintAns(ans, elem);
 }
 
 int main() {
