@@ -81,7 +81,4 @@ bool DSU::same(int u, int v) {
   return get(u) == get(v);
 }
 
-DSU::DSU(int n) {
-  parent.resize(n, -1);
-  size.resize(n, 1);
-}
+DSU::DSU(int n): parent(n, -1), size(n, 1) {}
