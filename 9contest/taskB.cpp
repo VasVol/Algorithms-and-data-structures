@@ -31,7 +31,7 @@ bool operator<(const Edge& a, const Edge& b) {
   return a.v < b.v;
 }
 
-void solve(int n, std::vector<Edge>& g) {
+void kruskal(int n, std::vector<Edge>& g) {
   std::sort(g.begin(), g.end());
   long long ans = 0;
   DSU dsu(n);
@@ -52,7 +52,7 @@ int main() {
     std::cin >> g[i].u >> g[i].v >> g[i].c;
     --g[i].u, --g[i].v;
   }
-  solve(n, g);
+  kruskal(n, g);
 }
 
 int DSU::get(int v) {
