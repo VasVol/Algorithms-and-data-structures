@@ -12,40 +12,35 @@ void dfs(int v, const std::vector<std::vector<int>>& g,
   }
 }
 
-int main() {
-  int l, r;
-  std::cin >> l >> r;
-  std::vector<std::vector<int>> g1(l);
-  for (int i = 0; i < l; ++i) {
-    int k;
-    std::cin >> k;
-    g1[i].resize(k);
-    for (int j = 0; j < k; ++j) {
-      std::cin >> g1[i][j];
-      --g1[i][j];
-      g1[i][j] += l;
-    }
+void print_ans(int l, const std::vector<int>& left, const std::vector<int>& right) {
+  std::cout << left.size() + right.size() << "\n";
+  std::cout << left.size() << " ";
+  for (int v : left) {
+    std::cout << v + 1 << " ";
   }
-  std::vector<int> a(l);
-  for (int i = 0; i < l; ++i) {
-    std::cin >> a[i];
-    --a[i];
-    a[i] += l;
+  std::cout << "\n";
+  std::cout << right.size() << " ";
+  for (int u : right) {
+    std::cout << u - l + 1 << " ";
   }
-  std::vector<std::vector<int>> g(l + r);
+}
+
+void minimum_vertex_coverage(int l, int r, const std::vector<std::vector<int>>& graph,
+                             const std::vector<int>& matching) {
+  std::vector<std::vector<int>> oriented_graph(l + r);
   for (int v = 0; v < l; ++v) {
-    for (int u : g1[v]) {
-      if (a[v] == u) {
-        g[u].push_back(v);
+    for (int u : graph[v]) {
+      if (matching[v] == u) {
+        oriented_graph[u].push_back(v);
       } else {
-        g[v].push_back(u);
+        oriented_graph[v].push_back(u);
       }
     }
   }
   std::vector<bool> used(l + r, false);
   for (int v = 0; v < l; ++v) {
-    if ((a[v] == l - 1) && (!used[v])) {
-      dfs(v, g, used);
+    if ((matching[v] == l - 1) && (!used[v])) {
+      dfs(v, oriented_graph, used);
     }
   }
   std::vector<int> left, right;
@@ -59,14 +54,28 @@ int main() {
       right.push_back(v);
     }
   }
-  std::cout << left.size() + right.size() << "\n";
-  std::cout << left.size() << " ";
-  for (int v : left) {
-    std::cout << v + 1 << " ";
+  print_ans(l, left, right);
+}
+
+int main() {
+  int l, r; // sizes of left and right graph parts
+  std::cin >> l >> r;
+  std::vector<std::vector<int>> graph(l);
+  for (int i = 0; i < l; ++i) {
+    int k;
+    std::cin >> k;
+    graph[i].resize(k);
+    for (int j = 0; j < k; ++j) {
+      std::cin >> graph[i][j];
+      --graph[i][j];
+      graph[i][j] += l;
+    }
   }
-  std::cout << "\n";
-  std::cout << right.size() << " ";
-  for (int u : right) {
-    std::cout << u - l + 1 << " ";
+  std::vector<int> matching(l);
+  for (int i = 0; i < l; ++i) {
+    std::cin >> matching[i];
+    --matching[i];
+    matching[i] += l;
   }
+  minimum_vertex_coverage(l, r, graph, matching);
 }
