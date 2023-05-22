@@ -56,6 +56,47 @@ double EdmondsKarp(int n, int s, int t, std::vector<std::vector<double>>& g,
   return ans;
 }
 
+std::vector<int> get_vertices(double ans, int n, const std::vector<std::vector<double>>& gr,
+               const std::vector<std::vector<int>>& edges) {
+  auto g = gr;
+  for (int v = 1; v <= n; ++v) {
+    g[0][v] = 2 * ans;
+  }
+
+  EdmondsKarp(n + 2, 0, n + 1, g, edges);
+  std::vector<bool> used(n + 2, false);
+  std::vector<int> parent(n + 2, -1);
+  bfs(0, used, g, parent, edges);
+  std::vector<int> vertices;
+  for (int v = 1; v <= n; ++v) {
+    if (!used[v]) {
+      vertices.push_back(v);
+    }
+  }
+  return vertices;
+}
+
+double get_ans(int n, int m, const std::vector<std::vector<double>>& gr,
+               const std::vector<std::vector<int>>& edges) {
+  const int iter = 40;
+  double l = 0, r = m;
+  for (int it = 0; it < iter; ++it) {
+    double sigma = (l + r) / 2;
+
+    auto g = gr;
+    for (int v = 1; v <= n; ++v) {
+      g[0][v] = 2 * sigma;
+    }
+
+    if (EdmondsKarp(n + 2, 0, n + 1, g, edges) < 2 * m - eps) {
+      l = sigma;
+    } else {
+      r = sigma;
+    }
+  }
+  return r - 1.0 / (2 * n * n);
+}
+
 int main() {
   int n, m;
   std::cin >> n >> m;
@@ -79,39 +120,8 @@ int main() {
     edges[0].push_back(v);
     edges[v].push_back(n + 1);
   }
-  const int iter = 40;
-  double l = 0, r = m;
-  for (int it = 0; it < iter; ++it) {
-    double sigma = (l + r) / 2;
-
-    auto g = gr;
-    for (int v = 1; v <= n; ++v) {
-      g[0][v] = 2 * sigma;
-    }
-
-    if (EdmondsKarp(n + 2, 0, n + 1, g, edges) < 2 * m - eps) {
-      l = sigma;
-    } else {
-      r = sigma;
-    }
-  }
-  double ans = r - 1.0 / (2 * n * n);
-
-  auto g = gr;
-  for (int v = 1; v <= n; ++v) {
-    g[0][v] = 2 * ans;
-  }
-
-  EdmondsKarp(n + 2, 0, n + 1, g, edges);
-  std::vector<bool> used(n + 2, false);
-  std::vector<int> parent(n + 2, -1);
-  bfs(0, used, g, parent, edges);
-  std::vector<int> vertices;
-  for (int v = 1; v <= n; ++v) {
-    if (!used[v]) {
-      vertices.push_back(v);
-    }
-  }
+  double ans = get_ans(n, m, gr, edges);
+  auto vertices = get_vertices(ans, n, gr, edges);
   std::cout << vertices.size() << "\n";
   for (int v : vertices) {
     std::cout << v << "\n";
